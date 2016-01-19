@@ -3,6 +3,8 @@ package com.ml2.shared.gui;
 import com.badlogic.gdx.math.GridPoint2;
 
 public class GUIObject {
+	public static final String TAG = GUIObject.class.getName();
+	
 	private GUIObject parent;
 	private GridPoint2 pos;
 	private GridPoint2 dims; //Width, height

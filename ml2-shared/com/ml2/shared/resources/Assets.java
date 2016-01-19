@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.Disposable;
 
 public class Assets implements Disposable, AssetErrorListener {
 	public final String TAG = Assets.class.getName();
+	
 	private final AssetManager manager;
 	
 	public Assets() {

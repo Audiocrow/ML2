@@ -8,6 +8,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.ml2.shared.resources.Assets;
 
 public class ClientLoop extends ApplicationAdapter {
+	public final static String TAG = ClientLoop.class.getName();
+	
 	private Assets assets;
 	private SpriteBatch batch;
 	private ClientController clientController;

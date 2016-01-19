@@ -14,6 +14,8 @@ import com.badlogic.gdx.utils.Pool;
  */
 
 public class Pools {
+	public final static String TAG = Pools.class.getName();
+	
 	private Pool<GridPoint2> gp2pool;
 	
 	public GridPoint2 getGP2() {
