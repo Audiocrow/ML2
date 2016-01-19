@@ -10,12 +10,14 @@ import com.ml2.shared.resources.Assets;
 public class ClientLoop extends ApplicationAdapter {
 	private Assets assets;
 	private SpriteBatch batch;
+	private ClientController clientController;
 	private boolean paused;
 	
 	@Override
 	public void create () {
 		assets = new Assets();
 		batch = new SpriteBatch();
+		clientController = new ClientController(assets);
 		paused = false;
 	}
 
@@ -31,7 +33,7 @@ public class ClientLoop extends ApplicationAdapter {
 	
 	@Override
 	public void render () {
-		if(!paused) { } //Control(ler) goes here
+		if(!paused) { clientController.update(); }
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		if(!paused) { assets.update(); }
