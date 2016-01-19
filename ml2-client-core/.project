@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>ml2-client-core</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.jdt.core.javabuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.springsource.ide.eclipse.gradle.core.nature</nature>
+		<nature>org.eclipse.jdt.core.javanature</nature>
+	</natures>
+	<linkedResources>
+		<link>
+			<name>ml2-shared</name>
+			<type>2</type>
+			<location>C:/Users/Crow/Desktop/Class And Code/Java Workspace/libgdx/ml2/ml2-shared</location>
+		</link>
+	</linkedResources>
+</projectDescription>
