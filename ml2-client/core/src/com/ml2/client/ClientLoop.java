@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.ml2.shared.gui.GUIManager;
 import com.ml2.shared.resources.Assets;
 
 public class ClientLoop extends ApplicationAdapter {
@@ -13,6 +14,7 @@ public class ClientLoop extends ApplicationAdapter {
 	private Assets assets;
 	private SpriteBatch batch;
 	private ClientController clientController;
+	private GUIManager guiManager;
 	private boolean paused;
 	
 	@Override
@@ -20,6 +22,7 @@ public class ClientLoop extends ApplicationAdapter {
 		assets = new Assets();
 		batch = new SpriteBatch();
 		clientController = new ClientController(assets);
+		guiManager = new GUIManager();
 		paused = false;
 	}
 
@@ -38,7 +41,13 @@ public class ClientLoop extends ApplicationAdapter {
 		if(!paused) { clientController.update(); }
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		if(!paused) { assets.update(); }
+		batch.begin();
+		guiManager.draw(batch);
+		batch.end();
+		if(!paused) {
+			assets.update();
+			guiManager.loadUpdate();
+		}
 	}
 	
 }
