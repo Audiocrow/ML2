@@ -1,11 +1,14 @@
 package com.ml2.shared.utils;
 
 public class Dimensions {
-	//(x, y): top left corner of the bounding box
-	private int x;
-	private int y;
+	/**(x,y): top left corner of the bounding box*/
+	private int x,y;
 	private int width;
 	private int height;
+	private int minWidth;
+	private int minHeight;
+	private int maxWidth;
+	private int maxHeight;
 	
 	public Dimensions(Dimensions b) {
 		x = b.x;
