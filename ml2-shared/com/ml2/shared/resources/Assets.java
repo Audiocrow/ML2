@@ -34,6 +34,8 @@ public class Assets implements Disposable, AssetErrorListener {
 		atlasRefs = new ObjectMap<String, TextureAtlas>(1, 0.9f);
 		patchRefs = new ObjectMap<String, NinePatch>(1, 0.9f);
 	}
+	/** An {@link Atlas} won't be usable immediately - it will have to be loaded first.
+	 */
 	public TextureAtlas getAtlas(String name) {
 		TextureAtlas result = atlasRefs.get(name);
 		if(result == null) {
@@ -63,8 +65,9 @@ public class Assets implements Disposable, AssetErrorListener {
 	public void error(AssetDescriptor ad, Throwable e) {
 		Gdx.app.error(TAG, "Couldn't load asset '" + ad.fileName + "'", (Exception)e);
 	}
-	//Reminder: finishLoading() halts everything until the queue has all been loaded - recommended just for loading GUI
+	/**Reminder: finishLoading() halts everything until the queue has all been loaded - recommended just for loading GUI.*/
 	public void finishLoading() { manager.finishLoading(); }
 	public float getProgress() { return manager.getProgress(); }
+	/**Calls manager.update() to continue loading of assets.*/
 	public boolean update() { return manager.update(); }
 }
