@@ -3,15 +3,25 @@ import com.ml2.shared.resources.Constants;
 import java.sql.*;
 
 public class Database {
-	private static String connectionString ="jdbc:mysql://localhost:3306/ml2";
-	private static Connection connection;
-	private static Statement command;
-	private static ResultSet data;
-	private static String query;
+	private static Database instance;
 	
+	private String connectionString ="jdbc:mysql://localhost:3306/ml2";
+	private Connection connection;
+	private Statement command;
+	private ResultSet data;
+	private String query;
 	
-	public static void newAccount(String Name, String Password){
-		
+	private Database() { }
+	/** Since Database is a singleton: whenever you need it, do <p>
+	 * {@code Database db = Database.getInstance(); db.newAccount(whatever, whatever2);} <p>
+	 * to get the only run-time Database
+	 */
+	public static Database getInstance() {
+		if(instance == null) instance = new Database();
+		return instance;
+	}
+	
+	public void newAccount(String Name, String Password){
 		try {
 			connection = DriverManager.getConnection(connectionString, Constants.DB_USERNAME, Constants.DB_PASSWORD);
 			command = connection.createStatement();

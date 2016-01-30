@@ -1,6 +1,7 @@
 package com.ml2.server;
 
 import java.io.InputStream;
+import java.util.Arrays;
 
 import com.badlogic.gdx.net.Socket;
 import com.badlogic.gdx.utils.Disposable;
@@ -14,6 +15,21 @@ public class Client implements Disposable {
 	Client(Socket s) {
 		socket = s;
 		address = s.getRemoteAddress();
+	}
+	
+	public void processMessage(byte[] msg)
+	{
+		int serverCall = -1;
+		byte[] msgCode = new byte[4];
+		
+		//copy first 4 bytes of incoming message to an array of byte;
+		msgCode = Arrays.copyOf(msg, 4);
+	    
+		//convert 4 bytes into an int
+		serverCall = java.nio.ByteBuffer.wrap(msgCode).getInt();
+	
+		//evoke serverProcessor class
+		//serverProcessor( message );
 	}
 	
 	public InputStream getInputStream() { return socket.getInputStream(); }
@@ -30,6 +46,8 @@ public class Client implements Disposable {
 		hash = 73*hash + address.hashCode();
 		return hash;
 	}
+	
+
 	@Override
 	public boolean equals(Object obj) {
 		/*Note: Client will equal another client even if the sockets are different
