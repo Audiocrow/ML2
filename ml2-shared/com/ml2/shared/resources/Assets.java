@@ -11,16 +11,16 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.ObjectMap;
 
+/**Use the String->asset maps here to store frequently used assets,
+ * because lookups from the manager are expensive.
+ * (See related methods below - setting cache to true means it will store in one of these) <p>
+ * Also note: anything requiring a manager.load will be unable to return a result immediately <br>
+ * (because manager.load is asynchronous). Thus, make sure the result isn't null before attempting to use it.
+ */
 public class Assets implements Disposable, AssetErrorListener {
 	public final String TAG = Assets.class.getName();
 	
 	private final AssetManager manager;
-	/*Use these String->asset maps to store frequently used assets,
-	 * because lookups from the manager are expensive.
-	 * (See related methods below - setting cache to true means it will store in one of these)
-	 * Also note: anything requiring a manager.load will be unable to return a result immediately
-	 * (because manager.load is asynchronous). Thus, make sure the result isn't null before attempting to use it.
-	 */
 	private final ObjectMap<String, TextureAtlas> atlasRefs;
 	private final ObjectMap<String, NinePatch> patchRefs;
 	
@@ -34,7 +34,7 @@ public class Assets implements Disposable, AssetErrorListener {
 		atlasRefs = new ObjectMap<String, TextureAtlas>(1, 0.9f);
 		patchRefs = new ObjectMap<String, NinePatch>(1, 0.9f);
 	}
-	/** An {@link Atlas} won't be usable immediately - it will have to be loaded first.
+	/** A {@link com.badlogic.gdx.graphics.g2d.TextureAtlas} won't be usable immediately - it will have to be loaded first.
 	 */
 	public TextureAtlas getAtlas(String name) {
 		TextureAtlas result = atlasRefs.get(name);

@@ -2,7 +2,8 @@ package com.ml2.shared.gui;
 
 import com.ml2.shared.utils.Dimensions;
 
-/** Stores only position and a parent - everything else is left to subclasses.
+/** Stores only position and a parent - everything else is left to subclasses. <p>
+ * Will receive a parent upon being placed into a child-storing GUI class (usually via whatever.add(obj))
  * @author Alexander Edgar
  */
 public abstract class GUIObject {
@@ -16,19 +17,21 @@ public abstract class GUIObject {
 	 */
 	public GUIObject(GUIObject other) {
 		parent = other.getParent();
-		dims.set(other.getX(), other.getY(), other.getWidth(), other.getHeight());
+		dims = new Dimensions(other.getDims());
 	}
-	public GUIObject(GUIObject parent, int x, int y, int width, int height) {
-		this.parent = parent;
-		dims.set(x, y, width, height);
+	public GUIObject(short x, short y, short width, short height) {
+		parent = null;
+		dims = new Dimensions(x, y, width, height);
+	}
+	public GUIObject(short x, short y, short width, short height, short minWidth, short minHeight) {
+		parent = null;
+		dims = new Dimensions(x, y, width, height, minWidth, minHeight);
+	}
+	public GUIObject(short x, short y, short width, short height, short minWidth, short minHeight, short maxWidth, short maxHeight) {
+		parent = null;
+		dims = new Dimensions(x, y, width, height, minWidth, minHeight, maxWidth, maxHeight);
 	}
 	public GUIObject getParent() { return parent; }
-	public int getX() { return dims.getX(); }
-	public void setX(int x) { dims.setX(x); }
-	public int getY() { return dims.getY(); }
-	public void setY(int y) { dims.setY(y); }
-	public int getWidth() { return dims.getWidth(); }
-	public void setWidth(int width) { dims.setWidth(width); }
-	public int getHeight() { return dims.getHeight(); }
-	public void setHeight(int height) { dims.setHeight(height); }
+	protected void setParent(GUIObject parent) { this.parent = parent; }
+	public Dimensions getDims() { return dims; }
 }
