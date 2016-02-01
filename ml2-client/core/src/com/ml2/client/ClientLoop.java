@@ -2,26 +2,33 @@ package com.ml2.client;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.ml2.shared.gui.GUIManager;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.ml2.shared.resources.Assets;
 
 public class ClientLoop extends ApplicationAdapter {
 	private SpriteBatch batch;
+	private InputMultiplexer multiplexer;
 	private ClientController clientController;
-	private GUIManager guiManager;
+	private Stage stage;
 	
 	@Override
 	public void create () {
 		Assets.makeInstance();
 		batch = new SpriteBatch();
 		clientController = new ClientController();
-		guiManager = new GUIManager();
+		stage = new Stage(new ScreenViewport());
+		multiplexer = new InputMultiplexer();
+		multiplexer.addProcessor(stage);
+		multiplexer.addProcessor(clientController);
 	}
 
 	@Override
 	public void dispose() {
+		stage.dispose();
 		Assets.getInstance().dispose();
 		super.dispose();
 	}
@@ -34,9 +41,14 @@ public class ClientLoop extends ApplicationAdapter {
 		 * if it isn't, the loading screen will be very quick anyway so there is no problem.*/
 		Assets.getInstance().finishLoading();
 	}
+	@Override
+	public void resize(int width, int height) {
+		stage.getViewport().update(width, height, true);
+	}
 	
 	@Override
 	public void render () {
+		stage.act(Gdx.graphics.getDeltaTime());
 		clientController.update();
 		Assets assets = Assets.getInstance();
 		Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -45,10 +57,10 @@ public class ClientLoop extends ApplicationAdapter {
 			assets.update();
 			//TODO: Loading screen code here
 		}
-		else {	
+		else {
 			batch.begin();
-			guiManager.draw(batch);
 			batch.end();
+			stage.draw();
 			assets.update();
 		}
 	}

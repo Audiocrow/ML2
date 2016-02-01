@@ -11,6 +11,8 @@ public class ClientController extends InputAdapter {
 		Gdx.input.setInputProcessor(this);
 	}
 
+	/**This method will run even if the InputMultiplexer has returned true after processing UI, so use booleans or whatever to make sure it is necessary.
+	 * <br>Also calls {@link #doRepeatingInput}.*/
 	public void update() {
 		doRepeatingInput(Gdx.graphics.getDeltaTime());
 		//Camera update goes here when/if we use one
