@@ -7,11 +7,15 @@ import com.ml2.shared.resources.Constants;
 import com.ml2.shared.utils.Dimensions;
 
 public class GUIDrawer {
-	public static void draw(Assets assets, SpriteBatch batch, GUIObject obj) {
-	}
-	public static void drawFrame(Assets assets, SpriteBatch batch, Dimensions dims) {
-		NinePatch frame = assets.getPatch("frame", assets.getAtlas(Constants.GUI_ATLAS), true);
-		if(frame == null) return;
-		frame.draw(batch, dims.getX(), dims.getY(), dims.getWidth(), dims.getHeight());
+	public static void draw(SpriteBatch batch, GUIObject obj) {
+		if(batch == null || obj == null) return;
+		Assets assets = Assets.getInstance();
+		if(obj instanceof Frame) {
+			Frame frame = (Frame)obj;
+			NinePatch tex = assets.getPatch(frame.ninePatch, assets.getAtlas(Constants.GUI_ATLAS), true);
+			if(tex == null) return;
+			Dimensions dims = frame.getDims();
+			tex.draw(batch, dims.getX(), dims.getY(), dims.getWidth(), dims.getHeight());
+		}
 	}
 }

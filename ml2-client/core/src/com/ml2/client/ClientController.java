@@ -4,15 +4,10 @@ import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputAdapter;
-import com.ml2.shared.resources.Assets;
 
 public class ClientController extends InputAdapter {
-	public final static String TAG = ClientController.class.getName();
 	
-	private final Assets assets;
-	
-	ClientController(Assets assets) {
-		this.assets = assets;
+	ClientController() {
 		Gdx.input.setInputProcessor(this);
 	}
 

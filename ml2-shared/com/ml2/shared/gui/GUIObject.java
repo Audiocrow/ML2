@@ -7,10 +7,8 @@ import com.ml2.shared.utils.Dimensions;
  * @author Alexander Edgar
  */
 public abstract class GUIObject {
-	public static final String TAG = GUIObject.class.getName();
-	
-	private GUIObject parent;
-	private Dimensions dims;
+	protected GUIObject parent;
+	protected Dimensions dims;
 	
 	/** Copies another GUIObject's values ({@link GUIObject} fields only).
 	 * @param other the GUIObject to copy.
