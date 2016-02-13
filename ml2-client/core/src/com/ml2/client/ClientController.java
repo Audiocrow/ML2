@@ -8,13 +8,14 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.ml2.client.UI.EditorTileset;
+import com.ml2.client.UI.MapEditor;
 import com.ml2.client.utils.CameraHelper;
 import com.ml2.shared.resources.Assets;
 import com.ml2.shared.resources.Constants;
@@ -25,7 +26,7 @@ public class ClientController extends InputAdapter implements Disposable {
 	protected CameraHelper camera;
 	protected Skin skin;
 	protected Stage stage;
-	private Window mapEditor;
+	private MapEditor mapEditor;
 	
 	ClientController() {
 		camera = new CameraHelper(Constants.CHUNK_WIDTH*Constants.TILE_SIZE, Constants.CHUNK_HEIGHT*Constants.TILE_SIZE);
@@ -46,26 +47,6 @@ public class ClientController extends InputAdapter implements Disposable {
 		multiplexer.addProcessor(stage);
 		multiplexer.addProcessor(this);
 		Gdx.input.setInputProcessor(multiplexer);
-	}
-	
-	public void makeMapEditor() {
-		if(mapEditor != null) return;
-		//TODO: Request FullTileData from server
-		Assets assets = Assets.getInstance();
-		Texture tiledata = assets != null ? assets.getTiledata() : null;
-		if(assets == null || tiledata == null) {
-			//TODO: notify user that tiledata needs to load first
-			return;
-		}
-		mapEditor = new Window("Map Editor", skin);
-		mapEditor.setSize(Constants.TILE_SIZE*5, Constants.TILE_SIZE*5);
-		mapEditor.setResizable(true);
-		mapEditor.setKeepWithinStage(true);
-		EditorTileset tileset = new EditorTileset(tiledata.getWidth(), tiledata.getHeight());
-		ScrollPane tilesetContainer = new ScrollPane(tileset, skin);
-		tilesetContainer.setScrollbarsOnTop(true);
-		mapEditor.add(tilesetContainer);
-		stage.addActor(mapEditor);
 	}
 	
 	@Override
@@ -103,29 +84,15 @@ public class ClientController extends InputAdapter implements Disposable {
 		else if(keycode == Keys.HOME)
 			camera.position.set(camera.viewportWidth/2, camera.viewportHeight/2, 0);
 		else if(keycode == Keys.F1) {
-			//TODO: send message to server requesting confirmation that this is admin
+			//TODO: send message to server requesting confirmation that this is admin.
+			//TODO: have the server send FullTiles by default to admins.
 			if(mapEditor != null) {
 				mapEditor.remove();
 				mapEditor = null;
 			}
-			else makeMapEditor();
-		}
-		else if(keycode == Keys.SPACE) {
-			if(mapEditor != null) {
-				for(Actor actor : mapEditor.getChildren()) {
-					if(actor instanceof ScrollPane) {
-						ScrollPane sp = (ScrollPane)actor;
-						for(Actor spActor : sp.getChildren()) {
-							if(spActor instanceof EditorTileset) {
-								EditorTileset editor = (EditorTileset)spActor;
-								Gdx.app.debug("cc", String.format("XY:(%.2f,%.2f) ScrollXY(%.2f,%.2f); EditorXY(%.2f,%.2f)",
-										sp.getX(), sp.getY(), sp.getScrollX(), sp.getScrollY(), editor.getX(), editor.getY()));
-								break;
-							}
-						}
-						break;
-					}
-				}
+			else {
+				mapEditor = new MapEditor(skin);
+				stage.addActor(mapEditor);
 			}
 		}
 		else return super.keyUp(keycode);
