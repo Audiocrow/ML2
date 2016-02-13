@@ -16,10 +16,10 @@ import com.badlogic.gdx.utils.ObjectSet;
 import com.ml2.shared.resources.Constants;
 
 public class ServerLoop extends ApplicationAdapter {
-	public final String TAG = ServerLoop.class.getName();
 	
 	SpriteBatch batch;
 	private ObjectSet<Client> clients;
+	private Database databaseConnect;
 	
 	@Override
 	public void create () {
@@ -44,7 +44,7 @@ public class ServerLoop extends ApplicationAdapter {
 						else newClient.dispose(); //Note: Client.dispose also disposes the socket
 					}
 					catch(GdxRuntimeException e) {
-						Gdx.app.error(TAG, e.getMessage());
+						Gdx.app.error("ServerLoop", e.getMessage());
 					}
 				}
 			}
@@ -54,17 +54,19 @@ public class ServerLoop extends ApplicationAdapter {
 	@Override
 	public void render () {
 		//Process any outstanding client messages
+		
 		for(Client c : clients) {
 			InputStream in = c.getInputStream();
 			try {
 				if(in.available() > 0) {
-					//MESSAGE PROCESSING STUFF HERE
-					//I RECOMMEND MAKING A METHOD FOR THIS
-					//MAYBE PLACE THIS CLIENT IN A QUEUE FOR PROCESSING???
+					//read in message from the input stream and process
+					byte[] msg = new byte[in.available()];
+					in.read(msg, 0, msg.length);
+					c.processMessage(msg);
 				}
 			}
 			catch(IOException e) {
-				Gdx.app.error(TAG, new String("Client at " + c.address + " created an IOException:") + e.getMessage());
+				Gdx.app.error("ServerLoop:Client " + c.address, e.getMessage());
 				//Kill this client, or ignore the message, or do nothing?
 			}
 		}
