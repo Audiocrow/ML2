@@ -3,8 +3,10 @@ package com.ml2.shared.resources;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetErrorListener;
+import com.badlogic.gdx.assets.AssetLoaderParameters;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.TextureLoader;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -20,27 +22,9 @@ import com.badlogic.gdx.utils.ObjectMap;
  */
 public class Assets implements Disposable, AssetErrorListener {
 	private static Assets instance;
-	/** The main ClientLoop::render looks at this to decide if it needs a loading screen or not.
-	 * <br> Set it to true with {@link #finishLoading()} if it's something important that you think needs a loading screen.
-	 */
-	private boolean showLoadingScreen;
-	private final AssetManager manager;
-	private final ObjectMap<String, TextureAtlas> atlasRefs;
-	private final ObjectMap<String, NinePatch> patchRefs;
-	private final int test;
-	
-	private Assets() {
-		showLoadingScreen=false;
-		manager = new AssetManager();
-		manager.setErrorListener(this);
-		TextureLoader.TextureParameter pref = new TextureLoader.TextureParameter();
-		pref.genMipMaps = true;
-		pref.minFilter = TextureFilter.MipMapLinearLinear;
-		pref.magFilter = TextureFilter.Nearest;
-		atlasRefs = new ObjectMap<String, TextureAtlas>(1, 0.9f);
-		patchRefs = new ObjectMap<String, NinePatch>(1, 0.9f);
-		test = (int)(Math.random()*100);
-		Gdx.app.log("Assets", "test returned " + test);
+	public static Assets getInstance() {
+		if(instance == null) instance = new Assets();
+		return instance;
 	}
 	/** Will create a new Assets and set it as the instance regardless of whether an instance already exists or not.
 	 * <br><pre>    Note: this should (and is) probably only be called by the main application class' create() method.</pre> 
@@ -50,10 +34,38 @@ public class Assets implements Disposable, AssetErrorListener {
 		instance = new Assets();
 		return instance;
 	}
-	public static Assets getInstance() {
-		if(instance == null) instance = new Assets();
-		return instance;
+	/** The main ClientLoop::render looks at this to decide if it needs a loading screen or not.
+	 * <br> Set it to true with {@link #finishLoading()} if it's something important that you think needs a loading screen.
+	 */
+	private boolean showLoadingScreen;
+	private final AssetManager manager;
+	private final ObjectMap<String, TextureAtlas> atlasRefs;
+	private final ObjectMap<String, NinePatch> patchRefs;
+	
+	private Texture tiledata;
+	private TextureLoader.TextureParameter prefs;
+	
+	private Assets() {
+		showLoadingScreen=false;
+		manager = new AssetManager();
+		manager.setErrorListener(this);
+		prefs = new TextureLoader.TextureParameter();
+		prefs.genMipMaps = true;
+		prefs.minFilter = TextureFilter.MipMapLinearLinear;
+		prefs.magFilter = TextureFilter.Nearest;
+		atlasRefs = new ObjectMap<String, TextureAtlas>(16, 0.9f);
+		patchRefs = new ObjectMap<String, NinePatch>(16, 0.9f);
 	}
+	@Override
+	public void dispose() {
+		manager.dispose(); //Reminder: this also unloads/disposes everything the manager is managing
+	}
+	@Override
+	public void error(AssetDescriptor ad, Throwable e) {
+		Gdx.app.error("ML2 Assets", "Couldn't load asset '" + ad.fileName + "'", (Exception)e);
+	}
+	/** See {@link #showLoadingScreen}.*/
+	public void finishLoading() { showLoadingScreen = true; }
 	/** A {@link com.badlogic.gdx.graphics.g2d.TextureAtlas} won't be usable immediately - it will have to be loaded first. <p>
 	 * I've made this always start a loading screen if the atlas has to be created, because they will be very large on average.
 	 */
@@ -80,19 +92,20 @@ public class Assets implements Disposable, AssetErrorListener {
 		}
 		return result;
 	}
-	@Override
-	public void dispose() {
-		manager.dispose(); //Reminder: this also unloads/disposes everything the manager is managing
+	public TextureLoader.TextureParameter getPrefs() { return prefs; }
+	public float getProgress() { return manager.getProgress(); }
+	/** Note: does not call for the manager to load the tiledata if that has not been done.*/
+	public Texture getTiledata() {
+		if(tiledata == null && manager.isLoaded(Constants.TILEDATA_ASSET))
+			tiledata = manager.get(Constants.TILEDATA_ASSET);
+		return tiledata;
 	}
-	@Override
-	public void error(AssetDescriptor ad, Throwable e) {
-		Gdx.app.error("ML2 Assets", "Couldn't load asset '" + ad.fileName + "'", (Exception)e);
+	/** Calls {@link AssetManager#load(fileName, type, parameter)}*/
+	public <T> void load(String fileName, Class<T> type, AssetLoaderParameters<T> parameter) {
+		manager.load(fileName, type, parameter);
 	}
-	/** See {@link #showLoadingScreen}.*/
-	public void finishLoading() { showLoadingScreen = true; }
 	/** @return Boolean: whether the main client loop should be displaying a loading screen or not.*/
 	public boolean showLoadingScreen() { return showLoadingScreen; }
-	public float getProgress() { return manager.getProgress(); }
 	/**Calls manager.update() to continue loading of assets.*/
 	public boolean update() {
 		boolean result = manager.update();
