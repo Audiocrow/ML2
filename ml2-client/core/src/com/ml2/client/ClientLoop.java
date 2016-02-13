@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.ml2.client.UI.MapEditor;
@@ -25,6 +26,7 @@ public class ClientLoop extends ApplicationAdapter {
 	private InputMultiplexer multiplexer;
 	private ClientController clientController;
 	private Stage stage;
+	private Skin skin;
 	
 	@Override
 	public void create () {
@@ -33,16 +35,29 @@ public class ClientLoop extends ApplicationAdapter {
 		batch = new SpriteBatch();
 		shaper = new ShapeRenderer();
 		clientController = new ClientController();
+		skin = new Skin(Gdx.files.internal("gui/uiskin.json"));
 		stage = new Stage(new ScreenViewport());
-		stage.addActor(new MapEditor("Map Editor", new Skin(Gdx.files.internal("gui/uiskin.json"))));
+		Label fpsLabel = new Label("FPS:", skin) {
+			@Override
+			public void act(final float delta) {
+				this.setText("FPS:" + Gdx.graphics.getFramesPerSecond());
+				super.act(delta);
+			}
+		};
+		fpsLabel.setY(Gdx.graphics.getHeight()-skin.getFont("default-font").getLineHeight());
+		stage.addActor(fpsLabel);
+		stage.addActor(new MapEditor("Map Editor", skin));
+		stage.setDebugAll(true);
 		multiplexer = new InputMultiplexer();
 		multiplexer.addProcessor(stage);
 		multiplexer.addProcessor(clientController);
+		Gdx.input.setInputProcessor(multiplexer);
 		World.makeInstance().addChunk(new GridPoint2(0, 0), new Chunk(false));
 	}
 
 	@Override
 	public void dispose() {
+		skin.dispose();
 		stage.dispose();
 		Assets.getInstance().dispose();
 		super.dispose();
@@ -77,13 +92,12 @@ public class ClientLoop extends ApplicationAdapter {
 		else {
 			Texture tiledata = assets.getTiledata();
 			//Test
-			if(tiledata != null) {
-				camera.apply(false);
-				batch.setProjectionMatrix(camera.combined);
-				batch.begin();
-				batch.draw(tiledata, 256, 256, 32, 32, 128, 0, 32, 32, false, true);
-				batch.end();
-			}
+			camera.apply(false);
+			batch.setProjectionMatrix(camera.combined);
+			batch.begin();
+			if(tiledata != null)
+				batch.draw(tiledata, 256, 256, 128, 0, 32, 32);
+			batch.end();
 			shaper.setProjectionMatrix(camera.combined);
 			shaper.begin(ShapeRenderer.ShapeType.Filled);
 			shaper.rect(Constants.TILE_SIZE, 0, Constants.TILE_SIZE, Constants.TILE_SIZE);

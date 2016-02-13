@@ -35,9 +35,7 @@ public class CameraHelper extends OrthographicCamera {
 	public void resize(int width, int height) {
 		//viewport.update(Constants.TILE_SIZE*Constants.CHUNK_WIDTH, Constants.TILE_SIZE*Constants.CHUNK_HEIGHT);
 		if(viewport != null) {
-			Gdx.app.debug("ch", "" + width + "," + height + " world " + viewport.getWorldWidth() + "," + viewport.getWorldHeight());
-			viewport.update(width, height, true);
-			update();
+			viewport.update(width, height);
 		}
 		//position.set(viewportWidth/2, viewportHeight/2, 0);
 		//position.set(width/2, height/2, 0);

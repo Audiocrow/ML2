@@ -11,9 +11,8 @@ public class ClientController extends InputAdapter {
 	protected CameraHelper camera;
 	
 	ClientController() {
-		Gdx.input.setInputProcessor(this);
 		camera = new CameraHelper(Constants.CHUNK_WIDTH*Constants.TILE_SIZE, Constants.CHUNK_HEIGHT*Constants.TILE_SIZE);
-		camera.setToOrtho(true);
+		//camera.setToOrtho(true);
 		camera.apply(true);
 		//camera.position.set(camera.viewportWidth/2, camera.viewportHeight/2, 0);
 	}
@@ -21,11 +20,11 @@ public class ClientController extends InputAdapter {
 	private void doRepeatingInput(float deltaTime) {
 		if(Gdx.app.getType() == ApplicationType.Desktop) {
 			if(Gdx.input.isKeyPressed(Keys.UP)) {
-				camera.translate(0, -1);
+				camera.translate(0, 1);
 				camera.update();
 			}
 			else if(Gdx.input.isKeyPressed(Keys.DOWN)) {
-				camera.translate(0, 1);
+				camera.translate(0, -1);
 				camera.update();
 			}
 			if(Gdx.input.isKeyPressed(Keys.RIGHT)) {
