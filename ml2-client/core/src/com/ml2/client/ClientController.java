@@ -4,19 +4,75 @@ import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
+import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.ml2.client.UI.EditorTileset;
 import com.ml2.client.utils.CameraHelper;
+import com.ml2.shared.resources.Assets;
 import com.ml2.shared.resources.Constants;
+import com.ml2.shared.world.World;
 
-public class ClientController extends InputAdapter {
+public class ClientController extends InputAdapter implements Disposable {
+	private InputMultiplexer multiplexer;
 	protected CameraHelper camera;
+	protected Skin skin;
+	protected Stage stage;
+	private Window mapEditor;
 	
 	ClientController() {
 		camera = new CameraHelper(Constants.CHUNK_WIDTH*Constants.TILE_SIZE, Constants.CHUNK_HEIGHT*Constants.TILE_SIZE);
-		//camera.setToOrtho(true);
 		camera.apply(true);
-		//camera.position.set(camera.viewportWidth/2, camera.viewportHeight/2, 0);
+		skin = new Skin(Gdx.files.internal("gui/uiskin.json"));
+		stage = new Stage(new ScreenViewport());
+		Label fpsLabel = new Label("FPS:", skin) {
+			@Override
+			public void act(final float delta) {
+				this.setText("FPS:" + Gdx.graphics.getFramesPerSecond());
+				super.act(delta);
+			}
+		};
+		fpsLabel.setY(Gdx.graphics.getHeight()-skin.getFont("default-font").getLineHeight());
+		stage.addActor(fpsLabel);
+		stage.setDebugAll(true);
+		multiplexer = new InputMultiplexer();
+		multiplexer.addProcessor(stage);
+		multiplexer.addProcessor(this);
+		Gdx.input.setInputProcessor(multiplexer);
 	}
 	
+	public void makeMapEditor() {
+		if(mapEditor != null) return;
+		//TODO: Request FullTileData from server
+		Assets assets = Assets.getInstance();
+		Texture tiledata = assets != null ? assets.getTiledata() : null;
+		if(assets == null || tiledata == null) {
+			//TODO: notify user that tiledata needs to load first
+			return;
+		}
+		mapEditor = new Window("Map Editor", skin);
+		mapEditor.setSize(Constants.TILE_SIZE*5, Constants.TILE_SIZE*5);
+		mapEditor.setResizable(true);
+		mapEditor.setKeepWithinStage(true);
+		EditorTileset tileset = new EditorTileset(tiledata.getWidth(), tiledata.getHeight());
+		ScrollPane tilesetContainer = new ScrollPane(tileset, skin);
+		tilesetContainer.setScrollbarsOnTop(true);
+		mapEditor.add(tilesetContainer);
+		stage.addActor(mapEditor);
+	}
+	
+	@Override
+	public void dispose() {
+		skin.dispose();
+		stage.dispose();
+	}
 	private void doRepeatingInput(float deltaTime) {
 		if(Gdx.app.getType() == ApplicationType.Desktop) {
 			if(Gdx.input.isKeyPressed(Keys.UP)) {
@@ -46,6 +102,32 @@ public class ClientController extends InputAdapter {
 		}
 		else if(keycode == Keys.HOME)
 			camera.position.set(camera.viewportWidth/2, camera.viewportHeight/2, 0);
+		else if(keycode == Keys.F1) {
+			//TODO: send message to server requesting confirmation that this is admin
+			if(mapEditor != null) {
+				mapEditor.remove();
+				mapEditor = null;
+			}
+			else makeMapEditor();
+		}
+		else if(keycode == Keys.SPACE) {
+			if(mapEditor != null) {
+				for(Actor actor : mapEditor.getChildren()) {
+					if(actor instanceof ScrollPane) {
+						ScrollPane sp = (ScrollPane)actor;
+						for(Actor spActor : sp.getChildren()) {
+							if(spActor instanceof EditorTileset) {
+								EditorTileset editor = (EditorTileset)spActor;
+								Gdx.app.debug("cc", String.format("XY:(%.2f,%.2f) ScrollXY(%.2f,%.2f); EditorXY(%.2f,%.2f)",
+										sp.getX(), sp.getY(), sp.getScrollX(), sp.getScrollY(), editor.getX(), editor.getY()));
+								break;
+							}
+						}
+						break;
+					}
+				}
+			}
+		}
 		else return super.keyUp(keycode);
 		return true;
 	}
@@ -69,6 +151,8 @@ public class ClientController extends InputAdapter {
 	/**This method will run even if the InputMultiplexer has returned true after processing UI, so use booleans or whatever to make sure it is necessary.
 	 * <br>Also calls {@link #doRepeatingInput}.*/
 	public void update(float deltaTime) {
+		if(stage != null)
+			stage.act(deltaTime);
 		doRepeatingInput(deltaTime);
 	}
 }

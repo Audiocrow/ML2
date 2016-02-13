@@ -2,40 +2,43 @@ package com.ml2.client.UI;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Window;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.scenes.scene2d.ui.Widget;
 import com.ml2.shared.resources.Assets;
 import com.ml2.shared.resources.Constants;
 
-public class MapEditor extends Window {
+public class EditorTileset extends Widget {
+	private int prefWidth;
+	private int prefHeight;
 	
-	public MapEditor(String title, Skin skin) {
-		super(title, skin);
-		init();
-	}
-	public MapEditor(String title, WindowStyle style) {
-		super(title, style);
-		init();
-	}
-	public MapEditor(String title, Skin skin, String styleName) {
-		super(title, skin, styleName);
-		init();
+	public EditorTileset(int width, int height) {
+		setSize(width, height);
+		prefWidth = width;
+		prefHeight = height;
 	}
 	
-	public void init() {
-		setMovable(true);
-		setResizable(true);
-		setKeepWithinStage(true);
-		
-	}
+	@Override
+	public float getMinWidth() { return Constants.TILE_SIZE; }
+	@Override
+	public float getMinHeight() { return Constants.TILE_SIZE; }
+	@Override
+	public float getPrefWidth() { return prefWidth; }
+	@Override
+	public float getPrefHeight() { return prefHeight; }
 	
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		super.draw(batch, parentAlpha);
+		float scrollX = 0, scrollY = 0;
+		if(getParent() instanceof ScrollPane) {
+			ScrollPane scrollPane = (ScrollPane)getParent();
+			scrollX = scrollPane.getScrollX();
+			scrollY = scrollPane.getScrollY();
+		}
 		Assets assets = Assets.getInstance();
 		Texture tiledata = assets.getTiledata();
 		if(tiledata != null) {
-			int oy = (int)(getTop() - Constants.TILE_SIZE - getPadTop());
+			int oy = (int)(getTop() - Constants.TILE_SIZE);
 			int ox = (int)(getX());
 			int right = (int)(getRight());
 			int bottom = (int)(getY());

@@ -3,17 +3,12 @@ package com.ml2.client;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.ml2.client.UI.MapEditor;
 import com.ml2.client.utils.CameraHelper;
 import com.ml2.shared.resources.Assets;
 import com.ml2.shared.resources.Constants;
@@ -23,10 +18,7 @@ import com.ml2.shared.world.World;
 public class ClientLoop extends ApplicationAdapter {
 	private SpriteBatch batch;
 	private ShapeRenderer shaper;
-	private InputMultiplexer multiplexer;
 	private ClientController clientController;
-	private Stage stage;
-	private Skin skin;
 	
 	@Override
 	public void create () {
@@ -35,30 +27,12 @@ public class ClientLoop extends ApplicationAdapter {
 		batch = new SpriteBatch();
 		shaper = new ShapeRenderer();
 		clientController = new ClientController();
-		skin = new Skin(Gdx.files.internal("gui/uiskin.json"));
-		stage = new Stage(new ScreenViewport());
-		Label fpsLabel = new Label("FPS:", skin) {
-			@Override
-			public void act(final float delta) {
-				this.setText("FPS:" + Gdx.graphics.getFramesPerSecond());
-				super.act(delta);
-			}
-		};
-		fpsLabel.setY(Gdx.graphics.getHeight()-skin.getFont("default-font").getLineHeight());
-		stage.addActor(fpsLabel);
-		stage.addActor(new MapEditor("Map Editor", skin));
-		stage.setDebugAll(true);
-		multiplexer = new InputMultiplexer();
-		multiplexer.addProcessor(stage);
-		multiplexer.addProcessor(clientController);
-		Gdx.input.setInputProcessor(multiplexer);
 		World.makeInstance().addChunk(new GridPoint2(0, 0), new Chunk(false));
 	}
 
 	@Override
 	public void dispose() {
-		skin.dispose();
-		stage.dispose();
+		clientController.dispose();
 		Assets.getInstance().dispose();
 		super.dispose();
 	}
@@ -73,13 +47,15 @@ public class ClientLoop extends ApplicationAdapter {
 	}
 	@Override
 	public void resize(int width, int height) {
-		clientController.camera.resize(width, height);
-		stage.getViewport().update(width, height, true);
+		if(clientController == null) return;
+		if(clientController.camera != null)
+			clientController.camera.resize(width, height);
+		if(clientController.stage != null && clientController.stage.getViewport() != null)
+			clientController.stage.getViewport().update(width, height, true);
 	}
 	
 	@Override
 	public void render () {
-		stage.act(Gdx.graphics.getDeltaTime());
 		clientController.update(Gdx.graphics.getDeltaTime());
 		Assets assets = Assets.getInstance();
 		Gdx.gl.glClearColor(0.05f, 0, 0.05f, 1);
@@ -108,8 +84,8 @@ public class ClientLoop extends ApplicationAdapter {
 			for(int y=0; y<=camera.viewportHeight; y+=Constants.TILE_SIZE)
 				shaper.line(0, y, camera.viewportWidth, y);
 			shaper.end();
-			stage.getViewport().apply();
-			stage.draw();
+			clientController.stage.getViewport().apply();
+			clientController.stage.draw();
 			assets.update();
 		}
 	}
