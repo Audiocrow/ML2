@@ -58,7 +58,7 @@ public class ClientLoop extends ApplicationAdapter {
 	public void render () {
 		clientController.update(Gdx.graphics.getDeltaTime());
 		Assets assets = Assets.getInstance();
-		Gdx.gl.glClearColor(0.05f, 0, 0.05f, 1);
+		Gdx.gl.glClearColor(0.1f, 0, 0.1f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		CameraHelper camera = clientController.camera;
 		if(assets.showLoadingScreen()) {
@@ -71,8 +71,9 @@ public class ClientLoop extends ApplicationAdapter {
 			camera.apply(false);
 			batch.setProjectionMatrix(camera.combined);
 			batch.begin();
-			if(tiledata != null)
-				batch.draw(tiledata, 256, 256, 128, 0, 32, 32);
+			if(tiledata != null) {
+				batch.draw(tiledata, 0, camera.viewportHeight-32, 128, 0, 32, 32);
+			}
 			batch.end();
 			shaper.setProjectionMatrix(camera.combined);
 			shaper.begin(ShapeRenderer.ShapeType.Filled);

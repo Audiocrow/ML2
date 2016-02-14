@@ -6,6 +6,7 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -27,6 +28,8 @@ public class ClientController extends InputAdapter implements Disposable {
 	protected Skin skin;
 	protected Stage stage;
 	private MapEditor mapEditor;
+	private int prevTouchX;
+	private int prevTouchY;
 	
 	ClientController() {
 		camera = new CameraHelper(Constants.CHUNK_WIDTH*Constants.TILE_SIZE, Constants.CHUNK_HEIGHT*Constants.TILE_SIZE);
@@ -55,6 +58,23 @@ public class ClientController extends InputAdapter implements Disposable {
 		stage.dispose();
 	}
 	private void doRepeatingInput(float deltaTime) {
+		if(Gdx.input.isTouched()) {
+			int screenX, screenY;
+			if(Gdx.app.getType() == ApplicationType.Android) {
+				screenX = Gdx.input.getX(0);
+				screenY = Gdx.input.getY(0);
+			}
+			else {
+				screenX = Gdx.input.getX();
+				screenY = Gdx.input.getY();
+			}
+			if(camera != null) {
+				if(screenY < 64) camera.translate(0, 2);
+				else if(screenY > Gdx.graphics.getHeight()-64) camera.translate(0, -2);
+				if(screenX > Gdx.graphics.getWidth()-64) camera.translate(2, 0);
+				else if(screenX < 64) camera.translate(-2, 0);
+			}
+		}
 		if(Gdx.app.getType() == ApplicationType.Desktop) {
 			if(Gdx.input.isKeyPressed(Keys.UP)) {
 				camera.translate(0, 1);
@@ -105,10 +125,25 @@ public class ClientController extends InputAdapter implements Disposable {
 	}
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+		prevTouchX = screenX;
+		prevTouchY = screenY;
+		if(pointer == 3) {
+			//TODO: check if admin
+			if(mapEditor != null) {
+				mapEditor.remove();
+				mapEditor = null;
+			}
+			else {
+				mapEditor = new MapEditor(skin);
+				stage.addActor(mapEditor);
+			}
+		}
 		return super.touchDown(screenX, screenY, pointer, button);
 	}
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
+		prevTouchX = screenX;
+		prevTouchY = screenY;
 		return super.touchDragged(screenX, screenY, pointer);
 	}
 	@Override
